@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>v80 Pilot Intel (Pro)</title>
+    <title>v81 Pilot Intel (Pro)</title>
     
     <!-- Favicon: Jata Negara Malaysia -->
     <link rel="icon" type="image/svg+xml" href="https://upload.wikimedia.org/wikipedia/commons/2/26/Coat_of_arms_of_Malaysia.svg">
@@ -17,7 +17,7 @@
 
     <style>
         :root { --cyber-blue: #0ea5e9; }
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #1e293b; overflow-x: hidden; user-select: none; } /* user-select: none untuk elak highlight */
         .font-heading { font-family: 'Space Grotesk', sans-serif; }
 
         .tip-fade { animation: tipFadeInOut 6s infinite; }
@@ -118,7 +118,7 @@
         /* PRINT STYLES */
         @media print {
             @page { size: A4 landscape; margin: 5mm; }
-            body { background: white !important; padding: 0 !important; }
+            body { background: white !important; padding: 0 !important; user-select: auto; }
             .no-print { display: none !important; }
             .max-w-\[1850px\] { max-width: 100% !important; width: 100% !important; margin: 0 !important; }
             table { display: table !important; width: 100% !important; table-layout: fixed !important; border: 1pt solid black !important; min-width: auto !important; border-spacing: 0; }
@@ -234,12 +234,14 @@
                     <i data-lucide="calendar" class="w-4 h-4"></i> JADUAL
                 </button>
                 <button id="login-btn" onclick="loginGoogle()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-xs shadow-lg active:scale-95 transition">LOGIN GOOGLE</button>
+                
+                <!-- USER PROFILE UPDATED TO SHOW EMAIL -->
                 <div id="user-profile" class="hidden flex items-center gap-3 bg-slate-800 p-1 pr-3 rounded-full border border-slate-700">
-                    <img id="u-avatar" class="w-8 h-8 rounded-full border border-blue-500">
-                    <div class="flex flex-col items-start leading-none">
-                        <span id="u-email" class="text-[9px] text-slate-300 font-medium lowercase mb-1">---</span>
-                        <button onclick="logout()" class="text-[10px] text-red-400 font-bold underline uppercase">Logout</button>
+                    <div class="flex flex-col items-end pl-3">
+                        <p id="u-email" class="text-[9px] text-blue-400 font-bold leading-none mb-1"></p>
+                        <button onclick="logout()" class="text-[8px] text-red-400 font-bold underline uppercase">Logout</button>
                     </div>
+                    <img id="u-avatar" class="w-8 h-8 rounded-full border border-blue-500">
                 </div>
                 <img id="dynamic-logo-web" src="https://github.com/ttv4u1/KP/raw/main/DVS.svg" class="w-10 h-10 ml-2 hidden lg:block">
             </div>
@@ -581,6 +583,17 @@
     </div>
 
     <script>
+        // DISABLE INSPECT ELEMENT LOGIC
+        document.addEventListener('contextmenu', event => event.preventDefault()); // Disable Right Click
+        document.onkeydown = function(e) {
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
         const firebaseConfig = { apiKey: "AIzaSyDdCwKNCx0nA1cZirGrw1UYvtumALluVXw", authDomain: "pilot-veterinar.firebaseapp.com", projectId: "pilot-veterinar", storageBucket: "pilot-veterinar.firebasestorage.app", messagingSenderId: "559136368070", appId: "1:559136368070:web:8aaa2dcb804c73f10cbec7" };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(); const db = firebase.firestore(); const provider = new firebase.auth.GoogleAuthProvider();
@@ -1303,13 +1316,13 @@
         async function loginGoogle() { try { const res = await auth.signInWithPopup(provider); currentUser = res.user; updateUI(); await checkAdminStatus(currentUser); loadData(); } catch(e) {} }
         function logout() { auth.signOut().then(() => location.reload()); }
         
+        // UPDATED UI FUNCTION TO SHOW EMAIL
         function updateUI() { 
             if(currentUser) { 
                 document.getElementById('login-btn').classList.add('hidden'); 
                 document.getElementById('user-profile').classList.remove('hidden'); 
-                document.getElementById('u-avatar').src = currentUser.photoURL; 
-                // Paparkan emel pengguna di profil
-                document.getElementById('u-email').innerText = currentUser.email || '---';
+                document.getElementById('u-avatar').src = currentUser.photoURL;
+                document.getElementById('u-email').innerText = currentUser.email; // Menampilkan email user
             } 
         }
         
